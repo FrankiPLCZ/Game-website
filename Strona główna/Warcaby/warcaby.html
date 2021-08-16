@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warcaby</title>
+    <style>
+
+.plansza {
+            display: block;
+            position: absolute;
+			width: 800px;
+            border: 1px solid black;
+            height: 800px;
+            margin-top: 3%;
+            margin-left: 25%;
+        }
+.wynik {
+            
+            position: absolute;
+			width: 300px;
+            border: 1px solid black;
+            height: 200px;
+            background-color:   #F2AA4CFF;
+            margin-top: 10%;
+            margin-left: 75%;
+            text-align: center;
+        }
+.koniec{
+            position: absolute;
+            margin-top: 5%;
+            margin-left: 77.5%;
+}
+
+        div.elem {
+            display:inline-block;
+            width: 12.5%;
+            height: 12.5%;
+			border-style:none;
+			float:left ;
+          
+        }
+		div.orange{
+			background-color:#F2AA4CFF;
+
+		}
+		div.black{
+			background-color:#101820FF;
+		}
+        div.pionek{
+			display:block;
+			position: absolute;
+			margin:10px;
+			border-radius:50%;
+			height: 80px;
+			width: 80px;
+			cursor:pointer;
+		}
+		div.pwhite{
+			background-color:#F0F2F2;
+		}
+		div.pblack{
+			background-color: black;
+		}
+
+
+
+
+    </style>
+
+<script>
+    
+    var pola = [];
+    for(i=0;i<64;i++)
+        pola.push(document.createElement("div"));
+
+    function wypelnij(){
+    for(i=0;i<8;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=1;i<8;i+=2)
+        pola[i].classList.add("elem","black");
+    for(i=8;i<16;i+=2)
+        pola[i].classList.add("elem","black");
+    for(i=9;i<16;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=16;i<24;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=17;i<24;i+=2)
+        pola[i].classList.add("elem","black");
+    for(i=25;i<32;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=24;i<32;i+=2)
+        pola[i].classList.add("elem","black");
+    for(i=32;i<40;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=33;i<40;i+=2)
+        pola[i].classList.add("elem","black");
+    for(i=41;i<48;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=40;i<48;i+=2)
+        pola[i].classList.add("elem","black");
+    for(i=48;i<56;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=49;i<56;i+=2)
+        pola[i].classList.add("elem","black");
+    for(i=57;i<64;i+=2)
+        pola[i].classList.add("elem","orange");
+    for(i=56;i<64;i+=2)
+        pola[i].classList.add("elem","black");}
+        wypelnij();
+</script>
+</head>
+<body>
+
+    <div id="plansza" class="plansza">
+    </div>
+    <div class="wynik">
+        <h1 id="pozc" style="color: black;margin-top: 15%;"></h1>
+
+        <h1 id="pozb" style="color: #F0F2F2;margin-top: 15%;"></h1>
+
+    </div>
+    <h2 class="koniec"></h2>
+
+<script>
+var pozostalebiale = 12;
+var pozostaleczarne=12;
+var pozc = document.querySelector("#pozc");
+pozc.innerHTML=pozostaleczarne;
+var pozb = document.querySelector("#pozb");
+pozb.innerHTML=pozostalebiale;
+var koniec = document.querySelector(".koniec");
+    //dodanie pól na plansze
+        var plansza = document.querySelector("#plansza")
+        for(i=0;i<64;i++)
+            plansza.appendChild(pola[i]); 
+        
+    //dodanie pionków na plansze
+    var pionkib = [];
+    var pionkic = [];
+    polapomaranczowe = document.querySelectorAll(".orange");
+    polaczarne = document.querySelectorAll(".black");
+    
+    for(i=0;i<12;i++)
+    {
+        pionkib.push(document.createElement("div"));
+        pionkib[i].classList.add("pionek","pwhite");
+        polapomaranczowe[i].appendChild(pionkib[i]);
+    }
+
+    for(i=20;i<32;i++)
+    {
+        pionkic.push(document.createElement("div"));
+        pionkic[i-20].classList.add("pionek","pblack");
+        polapomaranczowe[i].appendChild(pionkic[i-20]);
+    }
+
+
+
+
+
+
+    var lastx = 0;
+    var lasty = 0;
+
+//porusznie pionkami
+var currEll = null;
+    function mdown(e) {
+            currEll = e.currentTarget;
+            currEll.style.zIndex = 9999;
+            currEll.wx = e.offsetX;
+            currEll.wy = e.offsetY;
+            lastx = currEll.offsetLeft;
+            lasty = currEll.offsetTop;
+            
+            
+			
+        }
+	
+	plansza.addEventListener("mousemove", e => {
+            if (currEll != null) {
+                currEll.style.left = (e.x - plansza.offsetLeft - currEll.wx) + "px";
+                currEll.style.top = (e.y - plansza.offsetTop - currEll.wy) + "px";
+                
+            }
+        });
+        plansza.addEventListener("mouseleave", e => {
+            if (currEll != null) {
+                sprawdzpozycje();
+                currEll.style.zIndex = 100;
+                currEll = null;
+            }
+        });
+        plansza.addEventListener("mouseup", e => {
+            if (currEll != null) {
+                sprawdzpozycje();
+                currEll.style.zIndex = 100;
+                currEll = null;
+                
+            }
+        });
+
+    var pionek = document.querySelectorAll('.pionek');
+	for(l of pionek)
+		l.addEventListener("mousedown", mdown);
+
+
+
+
+
+
+
+
+
+
+
+
+//zapisanie pol pionkow
+var pionki = 
+	{
+			czarne : [],
+			białe:[],
+			
+			pp : function(x,y) 
+			{
+					var ob = 
+					{
+						x:x,
+						y:y
+					}
+			this.czarne.push(ob);
+			
+            },
+            ppp : function(x,y) 
+			{
+					var ob = 
+					{
+						x:x,
+						y:y
+					}
+			this.białe.push(ob);
+			
+			},
+
+			
+            zapiszpozycje : function(cz) 
+			{
+                this.białe.splice(0, this.białe.length);
+                this.czarne.splice(0, this.czarne.length);
+				for(i=0;i<pionkic.length;i++)
+                    this.pp(pionkic[i].offsetLeft,pionkic[i].offsetTop);
+                    
+                for(i=0;i<pionkib.length;i++)
+                    this.ppp(pionkib[i].offsetLeft,pionkib[i].offsetTop);
+            }
+        }
+    pionki.zapiszpozycje();
+    
+//sprawdzanie pozycji
+function sprawdzpozycje(){
+
+    
+    if(currEll.classList.contains("pwhite"))//pionki białe obsługa
+    {
+        
+        sprawdzaniebiciabale();//sprawdza bicia i ustawia pionek w razie i bicia i jego braku
+        mogetustac();//sprawdza czy na danym polu nie stoi inny pionek
+        
+    }
+    else//pionki czarne obsługa
+    {
+        sprawdzaniebiciaczarne();//sprawdza bicia i ustawia pionek w razie i bicia i jego braku
+        mogetustac();//sprawdza czy na danym polu nie stoi inny pionek
+        
+    }
+
+}
+
+function usunzbitypionek(){
+    var destrukcjax=0;
+    var destrukcjay=0;
+
+    var x = currEll.offsetLeft;
+    var y = currEll.offsetTop;
+    
+    destrukcjax = (lastx + x )/2;
+    destrukcjay = (lasty +y)/2;
+
+    if(currEll.classList.contains("pwhite")){
+        for(i = 0;i<pionki.czarne.length;i++)
+            if(pionki.czarne[i].x==destrukcjax&&pionki.czarne[i].y==destrukcjay)
+                {
+                    pionkic[i].remove();
+                    pionki.zapiszpozycje();
+                    pozostaleczarne--;
+                    pozc.innerHTML=pozostaleczarne;
+                    if(pozostaleczarne==0)
+                        koniec.innerHTML = "WYGRAŁY BIAŁE";
+                    
+                }
+    }
+    else{
+        for(i = 0;i<pionki.białe.length;i++)
+            if(pionki.białe[i].x==destrukcjax&&pionki.białe[i].y==destrukcjay)
+                {
+                    pionkib[i].remove();
+                    pionki.zapiszpozycje();
+                    pozostalebiale--;
+                    pozb.innerHTML=pozostalebiale;
+                    if(pozostalebiale==0)
+                        koniec.innerHTML = "WYGRAŁY CZARNE";
+                    
+                }
+
+    }
+
+
+        
+
+}
+
+function bicie(){
+    wyrownanie();
+    var x = currEll.offsetLeft;
+    var y = currEll.offsetTop;
+    
+    var roznicax = x-lastx;
+    if(roznicax<0)
+        roznicax=roznicax*-1;
+    var roznicay=y-lasty;
+    if(roznicay<0)
+        roznicay=roznicay*-1;
+
+
+
+
+    if(roznicay!=200||roznicax!=200 ||x<0||x>800 || y<0||y>800)
+    {
+        currEll.style.left = lastx-10 + "px";
+        currEll.style.top = lasty-10 + "px";
+    }
+    else
+    {
+        pionki.zapiszpozycje();
+        usunzbitypionek();//znajduje i usuwa zbity pionek
+    }
+}
+
+function mogetustac(){
+    var moge = 0;
+    var polex=currEll.offsetLeft;
+    var poley=currEll.offsetTop;
+    for(i=0;i<pionki.czarne.length;i++)
+                {
+                    if(pionki.czarne[i].x==polex&&pionki.czarne[i].y==poley)
+                        moge++;
+                        
+                }
+    for(i=0;i<pionki.białe.length;i++)
+                {
+                    if(pionki.białe[i].x==polex&&pionki.białe[i].y==poley)
+                        moge++;
+                        
+                }
+    if(moge>1)
+    {
+        currEll.style.left = lastx-10 + "px";
+        currEll.style.top = lasty-10 + "px";
+    }
+}
+
+function sprawdzaniebiciaczarne(){
+var biciel = false;
+var wolnel = true;
+var zbite = false;
+//sprawdzamy czy jest bicie w lewo
+var xbiciel = lastx-100;
+var ybiciel = lasty-100;
+
+        for(i=0;i<pionki.białe.length;i++)
+        {
+            if(pionki.białe[i].x==xbiciel&&pionki.białe[i].y==ybiciel)
+                biciel=true;
+        }
+        
+        if(biciel)//jeśli jest bicie to sprawdzamy czy jest wolne pole na biciu
+            {   
+                var xwolne = lastx-200;
+                var ywolne = lasty-200;
+
+                for(i=0;i<pionki.czarne.length;i++)
+                {
+                    if(pionki.czarne[i].x==xwolne&&pionki.czarne[i].y==ywolne)
+                        wolnel = false;
+
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnel = false;
+                        
+                }
+                for(i=0;i<pionki.białe.length;i++)
+                {
+                    if(pionki.białe[i].x==xwolne&&pionki.białe[i].y==ywolne)
+                        wolnel = false;
+                    
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnel = false;
+                        
+                }
+//jesli jest wolne to sprawiamy ze pionek moze tam stanac
+                if(wolnel && biciel)
+                {
+                    bicie();
+                    zbite=true;
+                    console.log("Jest bicie z lewej");
+                }
+                else
+                {
+                    
+                }
+            }
+        else//jeśli nie to ustawiamy pionek normalnie 
+            {
+                
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+if(!zbite)//jezeli bicie sie juz dokonalo to nie sprawdzamy
+{
+//Teraz sprawdzamy bicie z prawej
+var biciep = false;
+var wolnep = true;
+//sprawdzamy czy jest bicie w prawo
+var xbiciep = lastx+100;
+var ybiciep = lasty-100;
+
+        for(i=0;i<pionki.białe.length;i++)
+        {
+            if(pionki.białe[i].x==xbiciep&&pionki.białe[i].y==ybiciep)
+                biciep=true;
+        }
+        
+        if(biciep)//jeśli jest bicie to sprawdzamy czy jest wolne pole na biciu
+            {  
+                var xwolne = lastx+200;
+                var ywolne = lasty-200;
+
+                for(i=0;i<pionki.czarne.length;i++)
+                {
+                    if(pionki.czarne[i].x==xwolne&&pionki.czarne[i].y==ywolne)
+                        wolnep = false;
+
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnep = false;
+                        
+                }
+                for(i=0;i<pionki.białe.length;i++)
+                {
+                    if(pionki.białe[i].x==xwolne&&pionki.białe[i].y==ywolne)
+                        wolnep = false;
+
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnep = false;
+                        
+                }
+//jesli jest wolne to sprawiamy ze pionek moze tam stanac
+                if(wolnep && biciep)
+                {
+                    bicie();
+                    console.log("Jest bicie z prawej");
+                }
+                else
+                {
+                    centrowaniepionkaczarne();
+                }
+            }
+        else//jeśli nie to ustawiamy pionek normalnie 
+            {
+                centrowaniepionkaczarne();
+            }
+        }
+}
+
+function sprawdzaniebiciabale(){
+var biciel = false;
+var wolnel = true;
+var zbite = false;
+//sprawdzamy czy jest bicie w lewo
+var xbiciel = lastx-100;
+var ybiciel = lasty+100;
+
+        for(i=0;i<pionki.czarne.length;i++)
+        {
+            if(pionki.czarne[i].x==xbiciel&&pionki.czarne[i].y==ybiciel)
+                biciel=true;
+        }
+        
+        if(biciel)//jeśli jest bicie to sprawdzamy czy jest wolne pole na biciu
+            {   
+                var xwolne = lastx-200;
+                var ywolne = lasty+200;
+
+                for(i=0;i<pionki.czarne.length;i++)
+                {
+                    if(pionki.czarne[i].x==xwolne&&pionki.czarne[i].y==ywolne)
+                        wolnel = false;
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnel = false;
+                        
+                }
+                for(i=0;i<pionki.białe.length;i++)
+                {
+                    if(pionki.białe[i].x==xwolne&&pionki.białe[i].y==ywolne)
+                        wolnel = false;
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnel = false;
+                        
+                }
+//jesli jest wolne to sprawiamy ze pionek moze tam stanac
+                if(wolnel && biciel)
+                {
+                    console.log("Jest bicie z lewej");
+                    bicie();
+                    zbite=true;
+                }
+                else
+                {
+                   
+                }
+            }
+        else//jeśli nie to ustawiamy pionek normalnie 
+            {
+               
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+if(!zbite)
+{
+//Teraz sprawdzamy bicie z prawej
+var biciep = false;
+var wolnep = true;
+//sprawdzamy czy jest bicie w lewo
+var xbiciep = lastx+100;
+var ybiciep = lasty+100;
+
+        for(i=0;i<pionki.czarne.length;i++)
+        {
+            if(pionki.czarne[i].x==xbiciep&&pionki.czarne[i].y==ybiciep)
+                biciep=true;
+        }
+        
+        if(biciep)//jeśli jest bicie to sprawdzamy czy jest wolne pole na biciu
+            {   
+                var xwolne = lastx+200;
+                var ywolne = lasty+200;
+
+                for(i=0;i<pionki.czarne.length;i++)
+                {
+                    if(pionki.czarne[i].x==xwolne&&pionki.czarne[i].y==ywolne)
+                        wolnep = false;
+
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnep = false;
+                        
+                }
+                for(i=0;i<pionki.białe.length;i++)
+                {
+                    if(pionki.białe[i].x==xwolne&&pionki.białe[i].y==ywolne)
+                        wolnep = false;
+
+                    if(xwolne<0||xwolne>800 || ywolne<0||ywolne>800)
+                        wolnep = false;
+                        
+                }
+//jesli jest wolne to sprawiamy ze pionek moze tam stanac
+                if(wolnep && biciep)
+                {
+                    console.log("Jest bicie z prawej");
+                    bicie();
+                }
+                else
+                {
+                    centrowaniepionkabiałe();
+                }
+            }
+        else//jeśli nie to ustawiamy pionek normalnie 
+            {
+                centrowaniepionkabiałe();
+            }
+        }
+
+}
+
+function centrowaniepionkabiałe(){
+    wyrownanie();
+    var x = currEll.offsetLeft;
+    var y = currEll.offsetTop;
+    
+    var roznicax = x-lastx;
+    if(roznicax<0)
+        roznicax=roznicax*-1;
+    var roznicay=y-lasty;
+    
+
+
+
+
+    if(roznicay!=100||roznicax!=100||x<0||x>800 || y<0||y>800)
+    {
+        currEll.style.left = lastx-10 + "px";
+        currEll.style.top = lasty-10 + "px";
+
+    }
+    else
+    {
+        pionki.zapiszpozycje();
+    }
+}
+
+function centrowaniepionkaczarne(){
+    wyrownanie();
+    var x = currEll.offsetLeft;
+    var y = currEll.offsetTop;
+    
+    var roznicax = x-lastx;
+    if(roznicax<0)
+        roznicax=roznicax*-1;
+    var roznicay=y-lasty;
+    
+
+
+
+
+    if(roznicay!=-100||roznicax!=100||x<0||x>800 || y<0||y>800)
+    {
+        currEll.style.left = lastx-10 + "px";
+        currEll.style.top = lasty-10 + "px";
+
+    }
+    else
+    {
+        pionki.zapiszpozycje();
+    }
+}
+
+function wyrownanie(){
+    var x = currEll.offsetLeft;
+    var y = currEll.offsetTop;
+    if(x%100>50)
+        {
+            while(x%100!=0)
+                x++;
+        }
+        else
+        {
+            while(x%100!=0)
+                x--;
+        }
+
+        if(y%100>50)
+        {
+            while(y%100!=0)
+                y++;
+        }
+        else
+        {
+            while(y%100!=0)
+                y--;
+        }
+        currEll.style.left = x + "px";
+        currEll.style.top = y + "px";
+}
+</script>
+    
+</body>
+</html>
